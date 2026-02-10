@@ -1,0 +1,2119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>QR Inventory</title>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  --black: #000000;
+  --white: #ffffff;
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e5e5e5;
+  --gray-300: #d4d4d4;
+  --gray-400: #a3a3a3;
+  --gray-500: #737373;
+  --gray-600: #525252;
+  --gray-700: #404040;
+  --gray-800: #262626;
+  --gray-900: #171717;
+  --red: #ef4444;
+  --red-light: #fee2e2;
+  --green: #10b981;
+  --green-light: #d1fae5;
+  --blue: #3b82f6;
+  --blue-light: #dbeafe;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+}
+
+body {
+  background: var(--white);
+  color: var(--black);
+  -webkit-font-smoothing: antialiased;
+}
+
+.screen {
+  display: none;
+  min-height: 100vh;
+}
+
+.screen.active {
+  display: block;
+}
+
+.container {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+}
+
+/* HEADER */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 40px;
+  padding-top: 20px;
+}
+
+.logo {
+  height: 40px;
+  width: auto;
+  object-fit: contain;
+}
+
+.avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--black);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+/* HOME SCREEN */
+.hero {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.hero-title {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 16px;
+  letter-spacing: -1px;
+}
+
+.hero-subtitle {
+  font-size: 17px;
+  color: var(--gray-600);
+  line-height: 1.5;
+  max-width: 360px;
+  margin: 0 auto 40px;
+}
+
+.btn-large {
+  width: 100%;
+  padding: 20px;
+  border-radius: 16px;
+  border: none;
+  background: var(--black);
+  color: var(--white);
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+
+.btn-large:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+.btn-selection {
+  margin-top: 16px;
+  background: #000000;
+}
+
+/* MODE CHOICE */
+.nav-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 40px;
+  padding-top: 20px;
+}
+
+.btn-back {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 2px solid var(--gray-200);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px;
+  transition: all 0.2s;
+}
+
+.btn-back:active {
+  transform: scale(0.95);
+  background: var(--gray-50);
+}
+
+.nav-title {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+}
+
+.section-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+}
+
+.cards-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.card {
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  border-radius: 20px;
+  padding: 28px 24px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.card:active {
+  transform: scale(0.98);
+  border-color: var(--black);
+}
+
+.card.logout {
+  border-color: var(--red);
+  background: var(--red-light);
+}
+
+.card.login {
+  border-color: var(--green);
+  background: var(--green-light);
+}
+
+.card.details {
+  border-color: var(--blue);
+  background: var(--blue-light);
+}
+
+.card-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+
+.card-desc {
+  font-size: 15px;
+  color: var(--gray-600);
+  line-height: 1.5;
+}
+
+/* FORM */
+.form-wrapper {
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  border-radius: 20px;
+  padding: 32px 24px;
+  margin-top: 24px;
+}
+
+.form-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 32px;
+  letter-spacing: -0.5px;
+}
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--black);
+  margin-bottom: 8px;
+  letter-spacing: 0.3px;
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid var(--gray-200);
+  border-radius: 12px;
+  font-size: 16px;
+  color: var(--black);
+  background: var(--white);
+  transition: all 0.2s;
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: none;
+  border-color: var(--black);
+}
+
+.form-input:disabled {
+  background: var(--gray-50);
+  color: var(--gray-500);
+}
+
+.btn-submit {
+  width: 100%;
+  padding: 18px;
+  border-radius: 12px;
+  border: none;
+  background: var(--black);
+  color: var(--white);
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 32px;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+
+.btn-submit:active {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+
+/* SCAN SCREEN */
+.top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.status-badge.logout {
+  background: var(--red-light);
+  color: var(--red);
+  border: 2px solid var(--red);
+}
+
+.status-badge.login {
+  background: var(--green-light);
+  color: var(--green);
+  border: 2px solid var(--green);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.btn-home {
+  padding: 10px 20px;
+  border-radius: 24px;
+  border: 2px solid var(--black);
+  background: var(--white);
+  color: var(--black);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+
+.btn-home:active {
+  transform: scale(0.95);
+  background: var(--black);
+  color: var(--white);
+}
+
+.scanner-box {
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+#qr-reader,
+#details-qr-reader {
+  width: 100%;
+  max-width: 100%;
+  height: 300px;
+  margin: 0 auto 20px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--gray-50);
+}
+
+#qr-reader video,
+#details-qr-reader video {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover;
+}
+
+.scan-info {
+  text-align: center;
+}
+
+.scan-text {
+  font-size: 15px;
+  color: var(--gray-600);
+  margin-bottom: 8px;
+}
+
+.scan-count {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+/* ITEMS */
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.items-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.item {
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.item-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: var(--black);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+
+.item-image {
+  width: 60px;
+  height: 60px;
+  border-radius: 12px;
+  object-fit: cover;
+  background: var(--gray-100);
+  flex-shrink: 0;
+  border: 2px solid var(--gray-200);
+}
+
+.item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.item-ref-group {
+  margin-bottom: 8px;
+}
+
+.item-snum-group {
+  margin-bottom: 10px;
+}
+
+.item-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-500);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.item-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--black);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-value-small {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray-700);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.item-badges {
+  display: flex;
+  gap: 6px;
+}
+
+.badge {
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.badge-total {
+  background: var(--gray-100);
+  color: var(--gray-600);
+}
+
+.badge-available {
+  background: var(--green-light);
+  color: var(--green);
+}
+
+.badge-available.zero {
+  background: var(--red-light);
+  color: var(--red);
+}
+
+.btn-remove {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: none;
+  background: var(--red);
+  color: var(--white);
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.btn-remove:active {
+  transform: scale(0.9);
+}
+
+/* ACTIONS */
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.btn-action {
+  padding: 16px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+
+.btn-action:active {
+  transform: scale(0.98);
+}
+
+.btn-save {
+  background: var(--black);
+  color: var(--white);
+}
+
+.btn-clear {
+  background: var(--white);
+  color: var(--black);
+  border: 2px solid var(--gray-200);
+}
+
+/* DETAILS */
+.product-image {
+  width: 100%;
+  border-radius: 20px;
+  margin-bottom: 24px;
+  border: 2px solid var(--gray-200);
+}
+
+.details-card {
+  background: var(--white);
+  border: 2px solid var(--gray-200);
+  border-radius: 20px;
+  padding: 28px 24px;
+  margin-top: 24px;
+}
+
+.details-header {
+  text-align: center;
+  padding-bottom: 24px;
+  border-bottom: 2px solid var(--gray-200);
+  margin-bottom: 24px;
+}
+
+.details-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+
+.product-ref {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--gray-600);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  background: var(--gray-50);
+  padding: 12px 10px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gray-600);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid var(--gray-200);
+}
+
+td {
+  padding: 14px 10px;
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 15px;
+  color: var(--black);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover {
+  background: var(--gray-50);
+}
+
+/* SELECTION PDF SUCCESS SCREEN */
+.pdf-success {
+  max-width: 400px;
+  margin: 60px auto 0;
+  text-align: center;
+  padding: 0 24px;
+}
+
+.success-icon {
+  width: 80px;
+  height: 80px;
+  background: var(--green);
+  color: var(--white);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48px;
+  font-weight: 700;
+  margin: 0 auto 24px;
+  box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+}
+
+.success-title {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: var(--black);
+  letter-spacing: -0.5px;
+}
+
+.success-text {
+  font-size: 16px;
+  color: var(--gray-600);
+  margin-bottom: 32px;
+  line-height: 1.6;
+}
+
+.btn-secondary {
+  width: 100%;
+  padding: 16px;
+  margin-top: 12px;
+  border-radius: 16px;
+  border: 2px solid var(--gray-300);
+  background: var(--white);
+  color: var(--black);
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+
+.btn-secondary:active {
+  transform: scale(0.98);
+  background: var(--gray-100);
+}
+
+
+/* EMPTY STATE */
+.empty {
+  text-align: center;
+  padding: 60px 24px;
+}
+
+.empty-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.empty-text {
+  font-size: 16px;
+  color: var(--gray-500);
+}
+
+/* LOADER */
+.loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.loader-card {
+  background: var(--white);
+  padding: 40px;
+  border-radius: 20px;
+  text-align: center;
+  min-width: 200px;
+}
+
+.loader-spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 20px;
+  border: 4px solid var(--gray-200);
+  border-top-color: var(--black);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loader-text {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--black);
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gray-300);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-400);
+}
+
+/* ========================================= */
+/* BOTTOM NAVIGATION BAR */
+/* ========================================= */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #000000;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 50px;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  padding: 12px 20px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  z-index: 9999;
+  width: calc(100% - 40px);
+  max-width: 400px;
+}
+
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 60px;
+  border-radius: 20px;
+}
+
+.nav-btn:active {
+  transform: scale(0.95);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.nav-icon {
+  width: 24px;
+  height: 24px;
+  margin-bottom: 4px;
+  color: rgba(255, 255, 255, 0.6);
+  transition: all 0.2s ease;
+  stroke-width: 2;
+}
+
+.nav-btn.active .nav-icon {
+  color: #ffffff;
+  transform: scale(1.1);
+}
+
+.nav-label {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 500;
+  transition: all 0.2s ease;
+  letter-spacing: 0.2px;
+}
+
+.nav-btn.active .nav-label {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Padding bottom pour tous les screens pour éviter que le contenu soit caché par le bottom nav */
+.screen {
+  padding-bottom: 100px;
+}
+
+/* Responsive pour petits écrans */
+@media (max-width: 375px) {
+  .bottom-nav {
+    bottom: 15px;
+    width: calc(100% - 30px);
+    padding: 10px 16px;
+  }
+  
+  .nav-label {
+    font-size: 10px;
+  }
+  
+  .nav-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- HOME SCREEN -->
+<div id="home-screen" class="screen active">
+  <div class="container">
+    <div class="header">
+      
+      <div class="avatar">TC</div>
+    </div>
+
+    <div class="hero">
+      <h1 class="hero-title">Inventory Management</h1>
+      <p class="hero-subtitle">Scan QR codes to manage your collection with precision and ease</p>
+      <button class="btn-large" onclick="goToModeChoice()">Archiving</button>
+      <button class="btn-large btn-selection" onclick="goToSelection()">Selection</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODE CHOICE SCREEN -->
+<div id="mode-choice-screen" class="screen">
+  <div class="container">
+    <div class="nav-header">
+      <button class="btn-back" onclick="goHome()">←</button>
+      <div class="nav-title">Select Mode</div>
+    </div>
+
+    <div class="section-label">Choose Action</div>
+    
+    <div class="cards-grid">
+      <div class="card logout" onclick="goToForm('logout')">
+        <div class="card-title">Log Out</div>
+        <div class="card-desc">Remove items from inventory</div>
+      </div>
+
+      <div class="card login" onclick="goToForm('login')">
+        <div class="card-title">Log In</div>
+        <div class="card-desc">Return items to inventory</div>
+      </div>
+
+      <div class="card details" onclick="goToDetails()">
+        <div class="card-title">Details</div>
+        <div class="card-desc">View product information</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FORM SCREEN -->
+<div id="form-screen" class="screen">
+  <div class="container">
+    <div class="nav-header">
+      <button class="btn-back" onclick="goBackToMode()">←</button>
+      <div class="nav-title" id="form-title">Log Out</div>
+    </div>
+
+    <div class="form-wrapper">
+      <h2 class="form-title">User Information</h2>
+
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input type="text" id="name-input" class="form-input" placeholder="Enter your name">
+        <select id="name-select" class="form-select" style="display:none;">
+          <option value="">Select a name...</option>
+        </select>
+      </div>
+
+      <div class="form-group" id="location-group">
+        <label class="form-label">Location</label>
+        <input type="text" id="location-input" class="form-input" placeholder="Enter location">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="text" id="date-input" class="form-input" disabled>
+      </div>
+
+      <button class="btn-submit" onclick="advanceToScan()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- SCAN SCREEN -->
+<div id="scan-screen" class="screen">
+  <div class="container">
+    <div class="top-bar">
+      <div id="mode-badge" class="status-badge logout">
+        <span class="status-dot"></span>
+        <span>Log Out</span>
+      </div>
+      <button class="btn-home" onclick="goHome()">Home</button>
+    </div>
+
+    <div class="scanner-box">
+      <div id="qr-reader"></div>
+      <div class="scan-info">
+        <p class="scan-text">Position QR code in frame</p>
+        <p class="scan-count">Scanned: <span id="count">0</span></p>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">Scanned Items</div>
+    </div>
+
+    <div id="items-list" class="items-list">
+      <div class="empty">
+        <div class="empty-icon">📦</div>
+        <p class="empty-text">No items scanned yet</p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-action btn-save" onclick="saveAll()">Save All</button>
+      <button class="btn-action btn-clear" onclick="clearAll()">Clear</button>
+    </div>
+  </div>
+</div>
+
+<!-- DETAILS SCREEN -->
+<div id="details-screen" class="screen">
+  <div class="container">
+    <div class="top-bar">
+      <div class="nav-title">Product Details</div>
+      <button class="btn-home" onclick="goHome()">Home</button>
+    </div>
+
+    <div class="scanner-box">
+      <div id="details-qr-reader"></div>
+      <div class="scan-info">
+        <p class="scan-text">Scan QR code to view details</p>
+      </div>
+    </div>
+
+    <div id="details-content" style="display:none;">
+      <img id="product-image" class="product-image" alt="Product" />
+      
+      <div class="details-card">
+        <div class="details-header">
+          <h3 class="details-title">Archiving History</h3>
+          <p class="product-ref">
+            <span id="product-ref"></span> - <span id="product-snum"></span>
+          </p>
+        </div>
+        
+        <div style="overflow-x: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Log Out</th>
+                <th>Log In</th>
+                <th>Total</th>
+                <th>Avail</th>
+              </tr>
+            </thead>
+            <tbody id="archiving-tbody">
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- SELECTION FORM SCREEN -->
+<!-- ========================================= -->
+<div id="selection-form-screen" class="screen">
+  <div class="container">
+    <div class="nav-header">
+      <button class="btn-back" onclick="goBackToHomeFromSelection()">←</button>
+      <div class="nav-title">Selection</div>
+    </div>
+
+    <div class="form-wrapper">
+      <h2 class="form-title">Customer Information</h2>
+
+      <div class="form-group">
+        <label class="form-label">Customer Name</label>
+        <input type="text" id="customer-input" class="form-input" placeholder="Enter customer name">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Date</label>
+        <input type="text" id="selection-date-input" class="form-input" disabled>
+      </div>
+
+      <button class="btn-submit" onclick="advanceToSelectionScan()">Continue</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- SELECTION SCAN SCREEN -->
+<!-- ========================================= -->
+<div id="selection-scan-screen" class="screen">
+  <div class="container">
+    <div class="top-bar">
+      <div class="status-badge" style="background: #dbeafe; color: #3b82f6; border: 2px solid #3b82f6;">
+        <span class="status-dot"></span>
+        <span>Selection</span>
+      </div>
+      <button class="btn-home" onclick="goHome()">Home</button>
+    </div>
+
+    <div class="scanner-box">
+      <div id="selection-qr-reader"></div>
+      <div class="scan-info">
+        <p class="scan-text">Scan items for PDF generation</p>
+        <p class="scan-count">Scanned: <span id="selection-count">0</span></p>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <div class="section-title">Selected Items</div>
+    </div>
+
+    <div id="selection-items-list" class="items-list">
+      <div class="empty">
+        <div class="empty-icon">📦</div>
+        <p class="empty-text">No items scanned yet</p>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn-action btn-success" onclick="generateSelectionPDF()">Generate PDF</button>
+      <button class="btn-action btn-clear" onclick="clearSelectionItems()">Clear All</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- SELECTION PDF READY SCREEN -->
+<!-- ========================================= -->
+<div id="selection-pdf-screen" class="screen">
+  <div class="container" style="padding-top: 80px;">
+    <div class="pdf-success">
+      <div class="success-icon">✓</div>
+      <h2 class="success-title">PDF Generated!</h2>
+      <p class="success-text">Your selection has been saved and PDF is ready</p>
+      
+      <button class="btn-submit" onclick="openSelectionPDF()">PDF Ready - Open</button>
+      <button class="btn-secondary" onclick="goBackToHomeFromPDF()">Back to Home</button>
+    </div>
+  </div>
+</div>
+
+<!-- ========================================= -->
+<!-- BOTTOM NAVIGATION BAR -->
+<!-- ========================================= -->
+<nav class="bottom-nav">
+  <!-- BOUTON BACK -->
+  <button class="nav-btn" id="nav-back" onclick="handleBackNav()">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M19 12H5M12 19l-7-7 7-7"/>
+    </svg>
+    <span class="nav-label">Back</span>
+  </button>
+
+  <!-- BOUTON HOME -->
+  <button class="nav-btn active" id="nav-home" onclick="handleHomeNav()">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+      <polyline points="9 22 9 12 15 12 15 22"/>
+    </svg>
+    <span class="nav-label">Home</span>
+  </button>
+
+  <!-- BOUTON SELECTION -->
+  <button class="nav-btn" id="nav-selection" onclick="handleSelectionNav()">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+      <polyline points="14 2 14 8 20 8"/>
+      <line x1="16" y1="13" x2="8" y2="13"/>
+      <line x1="16" y1="17" x2="8" y2="17"/>
+      <polyline points="10 9 9 9 8 9"/>
+    </svg>
+    <span class="nav-label">Selection</span>
+  </button>
+
+  <!-- BOUTON ARCHIVING -->
+  <button class="nav-btn" id="nav-archiving" onclick="handleArchivingNav()">
+    <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+      <line x1="12" y1="22.08" x2="12" y2="12"/>
+    </svg>
+    <span class="nav-label">Archiving</span>
+  </button>
+</nav>
+
+<script>
+const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTT7cf3VZXeymJGQhBPiK8vhfLYENLbjxBPi0S6KN1lAVakR5Ps2ocX6EY_Pe5S5fvaA/exec';
+
+let currentMode = 'logout';
+let formData = { name: '', location: '', date: '' };
+let archivingScanner;
+let detailsScanner;
+let selectionScanner;
+let isArchivingScanning = false;
+let isDetailsScanning = false;
+let isSelectionScanning = false;
+let scannedItems = [];
+let selectionItems = [];
+let selectionFormData = { customer: '', date: '' };
+let selectionPDFUrl = '';
+let scanCooldown = false;
+let localQtyMap = {};
+
+function goHome() {
+  stopArchivingScan();
+  stopDetailsScan();
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('home-screen').classList.add('active');
+  scannedItems = [];
+  localQtyMap = {};
+  updateItemsList();
+  updateCount();
+}
+
+function goToModeChoice() {
+  document.getElementById("home-screen").classList.remove("active");
+  document.getElementById("mode-choice-screen").classList.add("active");
+}
+
+function goToSelection() {
+  document.getElementById("home-screen").classList.remove("active");
+  document.getElementById("selection-form-screen").classList.add("active");
+  
+  // Auto-fill date
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString('en-GB');
+  document.getElementById('selection-date-input').value = formattedDate;
+  selectionFormData.date = formattedDate;
+  
+  // Clear customer input
+  document.getElementById('customer-input').value = '';
+}
+
+function goToForm(mode) {
+  currentMode = mode;
+  document.getElementById("mode-choice-screen").classList.remove("active");
+  document.getElementById("form-screen").classList.add("active");
+  
+  if (mode === 'logout') {
+    document.getElementById('form-title').textContent = 'Log Out';
+    document.getElementById('location-group').style.display = 'block';
+    document.getElementById('name-input').style.display = 'block';
+    document.getElementById('name-select').style.display = 'none';
+  } else {
+    document.getElementById('form-title').textContent = 'Log In';
+    document.getElementById('location-group').style.display = 'none';
+    document.getElementById('name-input').style.display = 'none';
+    document.getElementById('name-select').style.display = 'block';
+    loadLoggedOutNames();
+  }
+  
+  const today = new Date().toLocaleDateString('en-GB');
+  document.getElementById('date-input').value = today;
+  document.getElementById('name-input').value = '';
+  document.getElementById('location-input').value = '';
+  document.getElementById('name-select').value = '';
+}
+
+function goToDetails() {
+  document.getElementById("mode-choice-screen").classList.remove("active");
+  document.getElementById("details-screen").classList.add("active");
+  document.getElementById("details-content").style.display = 'none';
+  startDetailsScan();
+}
+
+function goBackToMode() {
+  document.getElementById("form-screen").classList.remove("active");
+  document.getElementById("mode-choice-screen").classList.add("active");
+}
+
+async function loadLoggedOutNames() {
+  showLoader('Loading...');
+  
+  try {
+    const url = `${GOOGLE_APPS_SCRIPT_URL}?apiAction=getLoggedOutNames&spreadsheetId=1jBJdi1E142iMLwe8_59O8c4Dq_ua48AWcrukf9dYxwc`;
+    const response = await fetch(url);
+    const result = await response.json();
+    hideLoader();
+    
+    if (result.error) {
+      alert('Error: ' + result.error);
+      return;
+    }
+    
+    if (result.success && result.names) {
+      const select = document.getElementById('name-select');
+      select.innerHTML = '<option value="">Select a name...</option>';
+      result.names.forEach(name => {
+        const option = document.createElement('option');
+        option.value = name;
+        option.textContent = name;
+        select.appendChild(option);
+      });
+      
+      if (result.names.length === 0) {
+        alert('No logged out names found');
+      }
+    }
+  } catch (error) {
+    hideLoader();
+    console.error('Error:', error);
+    alert('Connection error');
+  }
+}
+
+function advanceToScan() {
+  let name = currentMode === 'logout' 
+    ? document.getElementById('name-input').value.trim()
+    : document.getElementById('name-select').value.trim();
+  
+  const location = document.getElementById('location-input').value.trim();
+  const date = document.getElementById('date-input').value;
+  
+  if (!name) {
+    alert(currentMode === 'logout' ? 'Please enter name' : 'Please select name');
+    return;
+  }
+  
+  if (currentMode === 'logout' && !location) {
+    alert('Please enter location');
+    return;
+  }
+  
+  formData = { name, location, date };
+  
+  document.getElementById("form-screen").classList.remove("active");
+  document.getElementById("scan-screen").classList.add("active");
+  
+  const badge = document.getElementById('mode-badge');
+  if (currentMode === 'logout') {
+    badge.innerHTML = '<span class="status-dot"></span><span>Log Out</span>';
+    badge.className = 'status-badge logout';
+  } else {
+    badge.innerHTML = '<span class="status-dot"></span><span>Log In</span>';
+    badge.className = 'status-badge login';
+  }
+  
+  startArchivingScan();
+}
+
+function startArchivingScan() {
+  if (isArchivingScanning) return;
+  if (!archivingScanner) {
+    archivingScanner = new Html5Qrcode("qr-reader");
+  }
+  archivingScanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 220 },
+    decodedText => onArchivingScan(decodedText)
+  ).then(() => {
+    isArchivingScanning = true;
+  }).catch(err => {
+    console.error('Scanner error:', err);
+    alert('Camera error');
+  });
+}
+
+function stopArchivingScan() {
+  if (archivingScanner && isArchivingScanning) {
+    archivingScanner.stop().then(() => { isArchivingScanning = false; }).catch(() => { isArchivingScanning = false; });
+  }
+}
+
+async function onArchivingScan(decodedText) {
+  if (scanCooldown) return;
+  
+  try {
+    const url = new URL(decodedText);
+    const params = new URLSearchParams(url.search);
+    const spreadsheetId = params.get('id');
+    const row = params.get('row');
+    
+    if (spreadsheetId && row) {
+      scanCooldown = true;
+      if (navigator.vibrate) navigator.vibrate(200);
+      await fetchItemData(spreadsheetId, row);
+      setTimeout(() => { scanCooldown = false; }, 800);
+    } else {
+      alert('Invalid QR code');
+    }
+  } catch (e) {
+    scanCooldown = false;
+    alert('Invalid QR code');
+  }
+}
+
+async function fetchItemData(spreadsheetId, row) {
+  showLoader('Loading...');
+  
+  try {
+    const url = `${GOOGLE_APPS_SCRIPT_URL}?apiAction=getItem&id=${spreadsheetId}&row=${row}`;
+    const response = await fetch(url);
+    const result = await response.json();
+    hideLoader();
+    
+    if (result.error) {
+      alert('Error: ' + result.error);
+      return;
+    }
+    
+    if (result.success && result.data) {
+      const row = result.data.sourceRow;
+      const qtyLocale = (localQtyMap[row] !== undefined) ? localQtyMap[row] : Number(result.data.qtyAvailable);
+
+      if (currentMode === 'logout' && qtyLocale <= 0) {
+        alert('No quantity available');
+        return;
+      }
+
+      result.data.qtyAvailable = qtyLocale;
+      addScannedItem(result.data);
+    }
+  } catch (error) {
+    hideLoader();
+    console.error('Error:', error);
+    alert('Connection error');
+  }
+}
+
+function addScannedItem(data) {
+  const item = {
+    id: Date.now(),
+    reference: data.reference || 'N/A',
+    sNumber: data.sNumber || 'N/A',
+    season: data.season || 'N/A',
+    description: data.description || 'N/A',
+    fabricCode: data.fabricCode || 'N/A',
+    composition: data.composition || 'N/A',
+    collection: data.collection || 'N/A',
+    filename: data.filename || '',
+    imageUrl: data.imageUrl || '',
+    totalQty: Number(data.totalQty) || 0,
+    qtyAvailable: Number(data.qtyAvailable) || 0,
+    sourceRow: data.sourceRow,
+    spreadsheetId: data.spreadsheetId,
+    action: '',
+    timestamp: new Date().toLocaleTimeString()
+  };
+  
+  scannedItems.push(item);
+
+  if (currentMode === 'logout') {
+    localQtyMap[item.sourceRow] = (localQtyMap[item.sourceRow] !== undefined ? localQtyMap[item.sourceRow] : item.qtyAvailable) - 1;
+  } else {
+    localQtyMap[item.sourceRow] = (localQtyMap[item.sourceRow] !== undefined ? localQtyMap[item.sourceRow] : item.qtyAvailable) + 1;
+  }
+
+  updateItemsList();
+  updateCount();
+  
+  setTimeout(() => {
+    const itemsList = document.getElementById('items-list');
+    itemsList.scrollTop = itemsList.scrollHeight;
+  }, 100);
+}
+
+function updateItemsList() {
+  const itemsList = document.getElementById('items-list');
+  
+  if (scannedItems.length === 0) {
+    itemsList.innerHTML = '<div class="empty"><div class="empty-icon">📦</div><p class="empty-text">No items scanned yet</p></div>';
+    return;
+  }
+  
+  itemsList.innerHTML = scannedItems.map((item, index) => {
+    const isZero = item.qtyAvailable <= 0;
+    const imageHtml = item.imageUrl 
+      ? `<img src="${item.imageUrl}" alt="${item.reference}" class="item-image" onerror="this.style.display='none'">`
+      : '<div class="item-image" style="background: var(--gray-200);"></div>';
+    
+    return `
+      <div class="item">
+        <div class="item-number">${index + 1}</div>
+        ${imageHtml}
+        <div class="item-info">
+          <div class="item-ref-group">
+            <div class="item-label">Reference</div>
+            <div class="item-value">${item.reference}</div>
+          </div>
+          <div class="item-snum-group">
+            <div class="item-label">S-Number</div>
+            <div class="item-value-small">${item.sNumber || 'N/A'}</div>
+          </div>
+          <div class="item-badges">
+            <span class="badge badge-total">Total: ${item.totalQty}</span>
+            <span class="badge badge-available ${isZero ? 'zero' : ''}">Avail: ${item.qtyAvailable}</span>
+          </div>
+        </div>
+        <button class="btn-remove" onclick="removeItem(${item.id})">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateCount() {
+  document.getElementById('count').textContent = scannedItems.length;
+}
+
+function removeItem(itemId) {
+  scannedItems = scannedItems.filter(item => item.id !== itemId);
+  updateItemsList();
+  updateCount();
+}
+
+async function saveAll() {
+  if (scannedItems.length === 0) {
+    alert('No items to save');
+    return;
+  }
+  
+  showLoader('Saving...');
+  
+  try {
+    for (const item of scannedItems) {
+      const params = new URLSearchParams({
+        apiAction: 'saveItem',
+        reference: item.reference || '',
+        sNumber: item.sNumber || '',
+        season: item.season || '',
+        description: item.description || '',
+        fabricCode: item.fabricCode || '',
+        composition: item.composition || '',
+        collection: item.collection || '',
+        filename: item.filename || '',
+        imageUrl: item.imageUrl || '',
+        action: item.action || '',
+        totalQty: String(item.totalQty || ''),
+        sourceRow: String(item.sourceRow || ''),
+        spreadsheetId: item.spreadsheetId || '',
+        mode: currentMode,
+        logoutName: currentMode === 'logout' ? formData.name : '',
+        loginName: currentMode === 'login' ? formData.name : '',
+        date: formData.date,
+        location: formData.location || ''
+      });
+
+      const url = `${GOOGLE_APPS_SCRIPT_URL}?${params.toString()}`;
+      await fetch(url);
+    }
+    
+    hideLoader();
+    alert(`Success! ${scannedItems.length} items saved`);
+    clearAll(true);
+  } catch (error) {
+    hideLoader();
+    console.error('Error:', error);
+    alert('Connection error');
+  }
+}
+
+function clearAll(skipConfirm = false) {
+  if (scannedItems.length === 0) return;
+  if (!skipConfirm && !confirm('Clear all items?')) return;
+  
+  scannedItems = [];
+  localQtyMap = {};
+  updateItemsList();
+  updateCount();
+}
+
+function startDetailsScan() {
+  if (isDetailsScanning) return;
+  if (!detailsScanner) {
+    detailsScanner = new Html5Qrcode("details-qr-reader");
+  }
+  detailsScanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 220 },
+    decodedText => onDetailsScan(decodedText)
+  ).then(() => {
+    isDetailsScanning = true;
+  }).catch(err => {
+    console.error('Scanner error:', err);
+    alert('Camera error');
+  });
+}
+
+function stopDetailsScan() {
+  if (detailsScanner && isDetailsScanning) {
+    detailsScanner.stop().then(() => { isDetailsScanning = false; }).catch(() => { isDetailsScanning = false; });
+  }
+}
+
+async function onDetailsScan(decodedText) {
+  try {
+    const url = new URL(decodedText);
+    const params = new URLSearchParams(url.search);
+    const spreadsheetId = params.get('id');
+    const row = params.get('row');
+    
+    if (spreadsheetId && row) {
+      if (navigator.vibrate) navigator.vibrate(200);
+      await fetchArchivingDetails(spreadsheetId, row);
+    } else {
+      alert('Invalid QR code');
+    }
+  } catch (e) {
+    alert('Invalid QR code');
+  }
+}
+
+async function fetchArchivingDetails(spreadsheetId, row) {
+  showLoader('Loading...');
+  
+  try {
+    const url = `${GOOGLE_APPS_SCRIPT_URL}?apiAction=getArchivingDetails&id=${spreadsheetId}&row=${row}`;
+    const response = await fetch(url);
+    const result = await response.json();
+    hideLoader();
+    
+    if (result.error) {
+      alert('Error: ' + result.error);
+      return;
+    }
+    
+    if (result.success) {
+      displayArchivingDetails(result);
+    }
+  } catch (error) {
+    hideLoader();
+    console.error('Error:', error);
+    alert('Connection error');
+  }
+}
+
+function displayArchivingDetails(data) {
+  document.getElementById('product-ref').textContent = data.reference;
+  document.getElementById('product-snum').textContent = data.sNumber;
+  
+  const productImg = document.getElementById('product-image');
+  if (data.imageUrl) {
+    productImg.src = data.imageUrl;
+    productImg.style.display = 'block';
+  } else {
+    productImg.style.display = 'none';
+  }
+  
+  const tbody = document.getElementById('archiving-tbody');
+  tbody.innerHTML = '';
+  
+  if (data.entries && data.entries.length > 0) {
+    data.entries.forEach(entry => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${entry.date || 'N/A'}</td>
+        <td>${entry.logoutName || '-'}</td>
+        <td>${entry.loginName || '-'}</td>
+        <td>${entry.totalQty || 0}</td>
+        <td>${entry.qtyAvailable || 0}</td>
+      `;
+      tbody.appendChild(row);
+    });
+  } else {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:var(--gray-500)">No history found</td></tr>';
+  }
+  
+  document.getElementById('details-content').style.display = 'block';
+}
+
+function showLoader(message = 'Loading...') {
+  let loader = document.getElementById('loader');
+  if (!loader) {
+    loader = document.createElement('div');
+    loader.id = 'loader';
+    loader.className = 'loader-overlay';
+    loader.innerHTML = `
+      <div class="loader-card">
+        <div class="loader-spinner"></div>
+        <div class="loader-text">${message}</div>
+      </div>
+    `;
+    document.body.appendChild(loader);
+  }
+}
+
+function hideLoader() {
+  const loader = document.getElementById('loader');
+  if (loader) loader.remove();
+}
+
+// ========================================
+// SELECTION FUNCTIONS
+// ========================================
+
+function goBackToHomeFromSelection() {
+  stopSelectionScan();
+  document.getElementById("selection-form-screen").classList.remove("active");
+  document.getElementById("home-screen").classList.add("active");
+  selectionItems = [];
+  selectionFormData = { customer: '', date: '' };
+}
+
+function advanceToSelectionScan() {
+  const customerName = document.getElementById('customer-input').value.trim();
+  
+  if (!customerName) {
+    alert('Please enter customer name');
+    return;
+  }
+ const isAllCaps = /^[A-Z0-9\s.,;:!?'"\-()\/]+$/.test(customerName);
+
+if (!isAllCaps) {
+  alert("❌ ERREUR : Le nom du customer doit être entièrement en CAPITALES.");
+  return; // Bloque la navigation
+}
+  
+  selectionFormData.customer = customerName;
+  
+  document.getElementById("selection-form-screen").classList.remove("active");
+  document.getElementById("selection-scan-screen").classList.add("active");
+  
+  initSelectionScanner();
+}
+
+function goBackToSelectionForm() {
+  stopSelectionScan();
+  document.getElementById("selection-scan-screen").classList.remove("active");
+  document.getElementById("selection-form-screen").classList.add("active");
+}
+
+function initSelectionScanner() {
+  if (isSelectionScanning) return;
+  if (!selectionScanner) {
+    selectionScanner = new Html5Qrcode("selection-qr-reader");
+  }
+  selectionScanner.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 220 },
+    decodedText => onSelectionScanSuccess(decodedText)
+  ).then(() => {
+    isSelectionScanning = true;
+  }).catch(err => {
+    console.error('Scanner error:', err);
+    alert('Camera error');
+  });
+  // if (selectionScanner) {
+  //   selectionScanner.clear();
+  // }
+  
+  // selectionScanner = new Html5QrcodeScanner("selection-qr-reader", {
+  //   fps: 10,
+  //   qrbox: { width: 250, height: 250 },
+  //   rememberLastUsedCamera: true
+  // });
+  
+  // selectionScanner.render(onSelectionScanSuccess, onSelectionScanError);
+  // isSelectionScanning = true;
+}
+function stopSelectionScan() {
+  if (selectionScanner && isSelectionScanning) {
+    selectionScanner.stop().then(() => { isSelectionScanning = false; }).catch(() => { isSelectionScanning = false; });
+  }
+}
+
+// function stopSelectionScan() {
+//   if (selectionScanner && isSelectionScanning) {
+//     selectionScanner.clear();
+//     isSelectionScanning = false;
+//   }
+// }
+
+async function onSelectionScanSuccess(decodedText) {
+  if (scanCooldown) return;
+  
+  scanCooldown = true;
+  setTimeout(() => { scanCooldown = false; }, 1000);
+  
+  const urlParams = new URLSearchParams(decodedText.split('?')[1]);
+  const spreadsheetId = urlParams.get('id');
+  const row = urlParams.get('row');
+  
+  if (!spreadsheetId || !row) {
+    alert('Invalid QR code');
+    return;
+  }
+  
+  showLoader('Loading item...');
+  
+  try {
+    const response = await fetch(`${GOOGLE_APPS_SCRIPT_URL}?apiAction=getItem&id=${spreadsheetId}&row=${row}`);
+    const result = await response.json();
+    
+    hideLoader();
+    
+    if (result.success) {
+      const itemData = result.data;
+      itemData.id = Date.now();
+      selectionItems.push(itemData);
+      updateSelectionItemsList();
+      updateSelectionCount();
+    } else {
+      alert('Error: ' + (result.error || 'Failed to load item'));
+    }
+  } catch (error) {
+    hideLoader();
+    console.error('Error:', error);
+    alert('Connection error');
+  }
+}
+
+function onSelectionScanError(error) {
+  // Ignore
+}
+
+function updateSelectionItemsList() {
+  const itemsList = document.getElementById('selection-items-list');
+  
+  if (selectionItems.length === 0) {
+    itemsList.innerHTML = '<div class="empty"><div class="empty-icon">📦</div><p class="empty-text">No items scanned yet</p></div>';
+    return;
+  }
+  
+  itemsList.innerHTML = selectionItems.map((item, index) => {
+    const imageHtml = item.imageUrl 
+      ? `<img src="${item.imageUrl}" alt="${item.reference}" class="item-image" onerror="this.style.display='none'">`
+      : '<div class="item-image" style="background: var(--gray-200);"></div>';
+    
+    return `
+      <div class="item">
+        <div class="item-number">${index + 1}</div>
+        ${imageHtml}
+        <div class="item-info">
+          <div class="item-ref-group">
+            <div class="item-label">Reference</div>
+            <div class="item-value">${item.reference}</div>
+          </div>
+          <div class="item-snum-group">
+            <div class="item-label">S-Number</div>
+            <div class="item-value-small">${item.sNumber || 'N/A'}</div>
+          </div>
+        </div>
+        <button class="btn-remove" onclick="removeSelectionItem(${item.id})">×</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function updateSelectionCount() {
+  document.getElementById('selection-count').textContent = selectionItems.length;
+}
+
+function removeSelectionItem(itemId) {
+  selectionItems = selectionItems.filter(item => item.id !== itemId);
+  updateSelectionItemsList();
+  updateSelectionCount();
+}
+
+function clearSelectionItems() {
+  if (selectionItems.length === 0) {
+    alert('No items to clear');
+    return;
+  }
+  
+  if (confirm('Clear all scanned items?')) {
+    selectionItems = [];
+    updateSelectionItemsList();
+    updateSelectionCount();
+  }
+}
+
+async function generateSelectionPDF() {
+  if (selectionItems.length === 0) {
+    alert('No items to generate PDF');
+    return;
+  }
+  
+  showLoader('Generating PDF and saving data...');
+  
+  try {
+    const saveResult = await saveToSelectionSheet();
+    
+    if (!saveResult.success) {
+      hideLoader();
+      alert('Error saving to sheet: ' + saveResult.error);
+      return;
+    }
+    
+    const pdfResult = await generateMultiItemPDF();
+    
+    hideLoader();
+    
+    if (pdfResult.success) {
+      selectionPDFUrl = pdfResult.pdfUrl;
+      stopSelectionScan();
+      document.getElementById("selection-scan-screen").classList.remove("active");
+      document.getElementById("selection-pdf-screen").classList.add("active");
+    } else {
+      alert('Error generating PDF: ' + (pdfResult.error || 'Unknown error'));
+    }
+  } catch (error) {
+    hideLoader();
+    console.error('Error:', error);
+    alert('Connection error: ' + error.message);
+  }
+}
+
+async function saveToSelectionSheet() {
+  try {
+    const itemsToSave = selectionItems.map(item => ({
+      customer: selectionFormData.customer,
+      date: selectionFormData.date,
+      reference: item.reference,
+      sNumber: item.sNumber,
+      season: item.season || '',
+      description: item.description || '',
+      fabricCode: item.fabricCode || '',
+      composition: item.composition || '',
+      collection: item.collection || '',
+      spreadsheetId: item.spreadsheetId,
+      sourceRow: item.sourceRow
+    }));
+    
+    const response = await fetch(`${GOOGLE_APPS_SCRIPT_URL}?apiAction=saveSelection`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        items: JSON.stringify(itemsToSave)
+      })
+    });
+    
+    const result = await response.json();
+    return result;
+  } catch (error) {
+    console.error('Error saving to selection sheet:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+async function generateMultiItemPDF() {
+  try {
+    const itemsJson = JSON.stringify(selectionItems);
+    const cacheResponse = await fetch(`${GOOGLE_APPS_SCRIPT_URL}?apiAction=storeScanData&items=${encodeURIComponent(itemsJson)}`);
+    const cacheResult = await cacheResponse.json();
+    
+    if (!cacheResult.success) {
+      return { success: false, error: 'Failed to store data in cache' };
+    }
+    
+    const pdfUrl = `${GOOGLE_APPS_SCRIPT_URL}?action=generateMultiPDF&cacheId=${cacheResult.cacheId}`;
+    
+    return {
+      success: true,
+      pdfUrl: pdfUrl
+    };
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+function openSelectionPDF() {
+  if (selectionPDFUrl) {
+    window.open(selectionPDFUrl, '_blank');
+  }
+}
+
+function goBackToHomeFromPDF() {
+  document.getElementById("selection-pdf-screen").classList.remove("active");
+  document.getElementById("home-screen").classList.add("active");
+  selectionItems = [];
+  selectionFormData = { customer: '', date: '' };
+  selectionPDFUrl = '';
+  updateBottomNav('home');
+}
+
+// ========================================
+// BOTTOM NAVIGATION BAR FUNCTIONS
+// ========================================
+
+let navigationHistory = ['home'];
+
+function updateBottomNav(activeScreen) {
+  // Retirer l'état actif de tous les boutons
+  document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+  
+  // Activer le bouton correspondant
+  if (activeScreen === 'home') {
+    document.getElementById('nav-home').classList.add('active');
+  } else if (activeScreen.includes('selection')) {
+    document.getElementById('nav-selection').classList.add('active');
+  } else if (activeScreen.includes('mode') || activeScreen.includes('form') || activeScreen.includes('scan') || activeScreen.includes('details')) {
+    document.getElementById('nav-archiving').classList.add('active');
+  }
+}
+
+function handleBackNav() {
+  // Vérifier quel écran est actif et revenir en arrière
+  const activeScreen = document.querySelector('.screen.active');
+  
+  if (!activeScreen) {
+    goHome();
+    return;
+  }
+  
+  const screenId = activeScreen.id;
+  
+  // Navigation intelligente selon l'écran actuel
+  if (screenId === 'home-screen') {
+    alert('You are already on the home screen');
+  } else if (screenId === 'selection-form-screen') {
+    goBackToHomeFromSelection();
+  } else if (screenId === 'selection-scan-screen') {
+    goBackToSelectionForm();
+  } else if (screenId === 'selection-pdf-screen') {
+    goBackToHomeFromPDF();
+  } else if (screenId === 'mode-choice-screen') {
+    goHome();
+  } else if (screenId === 'form-screen') {
+    goBackToMode();
+  } else if (screenId === 'scan-screen') {
+    goHome();
+  } else if (screenId === 'details-screen') {
+    goBackToModeFromDetails();
+  } else {
+    goHome();
+  }
+}
+
+function handleHomeNav() {
+  // Arrêter tous les scanners
+  stopArchivingScan();
+  stopDetailsScan();
+  stopSelectionScan();
+  
+  // Réinitialiser les données
+  scannedItems = [];
+  selectionItems = [];
+  localQtyMap = {};
+  
+  // Aller à Home
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('home-screen').classList.add('active');
+  
+  updateBottomNav('home');
+}
+
+function handleSelectionNav() {
+  // Arrêter tous les scanners
+  stopArchivingScan();
+  stopDetailsScan();
+  stopSelectionScan();
+  
+  // Réinitialiser les données Archiving
+  scannedItems = [];
+  localQtyMap = {};
+  
+  // Aller directement au formulaire Selection
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('selection-form-screen').classList.add('active');
+  
+  // Auto-fill date
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString('en-GB');
+  document.getElementById('selection-date-input').value = formattedDate;
+  selectionFormData.date = formattedDate;
+  
+  // Clear customer input
+  document.getElementById('customer-input').value = '';
+  
+  updateBottomNav('selection');
+}
+
+function handleArchivingNav() {
+  // Arrêter tous les scanners
+  stopArchivingScan();
+  stopDetailsScan();
+  stopSelectionScan();
+  
+  // Réinitialiser les données Selection
+  selectionItems = [];
+  selectionFormData = { customer: '', date: '' };
+  
+  // Aller directement au choix de mode Archiving
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('mode-choice-screen').classList.add('active');
+  
+  updateBottomNav('archiving');
+}
+
+// Mettre à jour les fonctions existantes pour gérer le bottom nav
+const originalGoHome = goHome;
+goHome = function() {
+  originalGoHome();
+  updateBottomNav('home');
+};
+
+const originalGoToSelection = goToSelection;
+goToSelection = function() {
+  // Arrêter tous les scanners
+  stopArchivingScan();
+  stopDetailsScan();
+  stopSelectionScan();
+  
+  // Réinitialiser Archiving
+  scannedItems = [];
+  localQtyMap = {};
+  
+  // Appeler la fonction originale
+  originalGoToSelection();
+  updateBottomNav('selection');
+};
+
+const originalGoToModeChoice = goToModeChoice;
+goToModeChoice = function() {
+  // Arrêter tous les scanners
+  stopArchivingScan();
+  stopDetailsScan();
+  stopSelectionScan();
+  
+  // Réinitialiser Selection
+  selectionItems = [];
+  selectionFormData = { customer: '', date: '' };
+  
+  // Appeler la fonction originale
+  originalGoToModeChoice();
+  updateBottomNav('archiving');
+};
+
+const originalAdvanceToSelectionScan = advanceToSelectionScan;
+advanceToSelectionScan = function() {
+  originalAdvanceToSelectionScan();
+  updateBottomNav('selection');
+};
+
+const originalAdvanceToScan = advanceToScan;
+advanceToScan = function() {
+  originalAdvanceToScan();
+  updateBottomNav('archiving');
+};
+
+</script>
+
+</body>
+</html>
