@@ -1841,6 +1841,7 @@ body {
 
 <script>
 
+
 const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTT7cf3VZXeymJGQhBPiK8vhfLYENLbjxBPi0S6KN1lAVakR5Ps2ocX6EY_Pe5S5fvaA/exec';
 
 const API_URL = 'https://script.google.com/macros/s/AKfycbyTT7cf3VZXeymJGQhBPiK8vhfLYENLbjxBPi0S6KN1lAVakR5Ps2ocX6EY_Pe5S5fvaA/exec';
@@ -2819,40 +2820,46 @@ function renderDetailsView() {
     </tr>
   `).join('');
   
-  const historyList = document.getElementById('details-history-list');
+  // ✅ NOUVEAU : HISTORY EN TABLEAU
+  const historyContainer = document.getElementById('details-history-list');
   
   if (!currentDetailsData.history || currentDetailsData.history.length === 0) {
-    historyList.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p class="empty-text">No history</p></div>';
+    historyContainer.innerHTML = '<div class="empty"><div class="empty-icon">📋</div><p class="empty-text">No history</p></div>';
   } else {
-    historyList.innerHTML = currentDetailsData.history.map((entry, index) => `
-      <div class="item">
-        <div class="item-number">${index + 1}</div>
-        <div class="item-info" style="flex: 1;">
-          <div style="margin-bottom: 8px;">
-            <div class="item-label">Date</div>
-            <div class="item-value-small">${entry.date || 'N/A'}</div>
-          </div>
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            <div>
-              <div class="item-label">Check Out</div>
-              <div class="item-value-small">${entry.checkOutName || '-'}</div>
-            </div>
-            <div>
-              <div class="item-label">Check In</div>
-              <div class="item-value-small">${entry.checkInName || '-'}</div>
-            </div>
-          </div>
-          <div style="margin-top: 8px;">
-            <div class="item-label">Destination</div>
-            <div class="item-value-small">${entry.destination || '-'}</div>
-          </div>
-          <div class="item-badges" style="margin-top: 8px;">
-            <span class="badge badge-total">Qty: ${entry.qtyLog || 0}</span>
-            <span class="badge badge-available">Avail: ${entry.qtyAvailable || 0}</span>
-          </div>
-        </div>
+    historyContainer.innerHTML = `
+      <div style="background: var(--white); border: 2px solid var(--gray-200); border-radius: 20px; padding: 16px; overflow-x: auto;">
+        <table style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--gray-200);">
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 700; color: var(--gray-600);">#</th>
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 700; color: var(--gray-600);">Date</th>
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 700; color: var(--gray-600);">Check Out</th>
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 700; color: var(--gray-600);">Check In</th>
+              <th style="padding: 12px; text-align: left; font-size: 12px; font-weight: 700; color: var(--gray-600);">Destination</th>
+              <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: 700; color: var(--gray-600);">Qty</th>
+              <th style="padding: 12px; text-align: center; font-size: 12px; font-weight: 700; color: var(--gray-600);">Available</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${currentDetailsData.history.map((entry, index) => `
+              <tr style="border-bottom: 1px solid var(--gray-200);">
+                <td style="padding: 12px; font-size: 14px; font-weight: 700; color: var(--black);">${index + 1}</td>
+                <td style="padding: 12px; font-size: 13px; color: var(--gray-700);">${entry.date || 'N/A'}</td>
+                <td style="padding: 12px; font-size: 13px; color: var(--gray-700);">${entry.checkOutName || '-'}</td>
+                <td style="padding: 12px; font-size: 13px; color: var(--gray-700);">${entry.checkInName || '-'}</td>
+                <td style="padding: 12px; font-size: 13px; color: var(--gray-700);">${entry.destination || '-'}</td>
+                <td style="padding: 12px; text-align: center;">
+                  <span style="padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; background: var(--gray-100); color: var(--gray-600);">${entry.qtyLog || 0}</span>
+                </td>
+                <td style="padding: 12px; text-align: center;">
+                  <span style="padding: 4px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; background: var(--green-light); color: var(--green);">${entry.qtyAvailable || 0}</span>
+                </td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
       </div>
-    `).join('');
+    `;
   }
 }
 
@@ -2887,7 +2894,7 @@ async function searchBySNumber() {
   try {
 
     const response = await fetch(
-      `${GOOGLE_APPS_SCRIPT_URL}?apiAction=getItemBySNumber&spreadsheetId=1jBJdi1E142iMLwe8_59O8c4Dq_ua48AWcrukf9dYxwc&sNumber=${encodeURIComponent(sNumber)}`
+      `${GOOGLE_APPS_SCRIPT_URL}?apiAction=getItemBySNumber&spreadsheetId=${ARCHIVING_SPREADSHEET_ID}&sNumber=${encodeURIComponent(sNumber)}`
     );
 
     const result = await response.json();
@@ -3086,7 +3093,7 @@ async function generateSelectionPDF() {
       date: selectionDate,
       submittedBy: username // ✅ ajoute username
     }));
-
+    console.log('Données envoyées à Apps Script :', finalItems);
     // 1️⃣ Sauvegarde dans la feuille Selection
     const saveResponse = await fetch(GOOGLE_APPS_SCRIPT_URL, {
       method: 'POST',
@@ -3183,7 +3190,7 @@ async function loadPitchScreen() {
 
   try {
     const response = await fetch(
-      `${GOOGLE_APPS_SCRIPT_URL}?apiAction=getPitchSubmitted&spreadsheetId=1jBJdi1E142iMLwe8_59O8c4Dq_ua48AWcrukf9dYxwc`
+      `${GOOGLE_APPS_SCRIPT_URL}?apiAction=getPitchSubmitted&spreadsheetId=${ARCHIVING_SPREADSHEET_ID}`
     );
 
     const result = await response.json();
@@ -3202,6 +3209,7 @@ async function loadPitchScreen() {
       `;
       return;
     }
+    result.items.reverse();
 
     // Ajoute la ligne de filtres si pas déjà présente
     addFiltersRow();
@@ -3295,7 +3303,7 @@ function addFiltersRow() {
 }
 function changeStatus(id, newStatus) {
 
-  fetch(`${GOOGLE_APPS_SCRIPT_URL}?apiAction=updatePitchStatus&spreadsheetId=1jBJdi1E142iMLwe8_59O8c4Dq_ua48AWcrukf9dYxwc&id=${encodeURIComponent(id)}&newStatus=${encodeURIComponent(newStatus)}`)
+  fetch(`${GOOGLE_APPS_SCRIPT_URL}?apiAction=updatePitchStatus&spreadsheetId=${ARCHIVING_SPREADSHEET_ID}&id=${encodeURIComponent(id)}&newStatus=${encodeURIComponent(newStatus)}`)
     .then(res => res.json())
     .then(data => {
       if (data.success) {
@@ -3324,30 +3332,37 @@ function showNotification(message, type = "success") {
   notif.textContent = message;
 
   notif.style.position = "fixed";
-  notif.style.bottom = "20px";
-  notif.style.right = "20px";
-  notif.style.padding = "12px 20px";
-  notif.style.borderRadius = "8px";
+  notif.style.top = "50%";
+  notif.style.left = "50%";
+  notif.style.transform = "translate(-50%, -50%) scale(0.9)";
+  notif.style.padding = "18px 30px";
+  notif.style.borderRadius = "12px";
   notif.style.color = "white";
-  notif.style.fontWeight = "500";
+  notif.style.fontSize = "16px";
+  notif.style.fontWeight = "600";
   notif.style.zIndex = "9999";
-  notif.style.boxShadow = "0 4px 12px rgba(0,0,0,0.2)";
+  notif.style.boxShadow = "0 8px 25px rgba(0,0,0,0.25)";
   notif.style.opacity = "0";
-  notif.style.transition = "opacity 0.3s ease";
+  notif.style.transition = "all 0.3s ease";
 
   notif.style.backgroundColor = type === "success" ? "#16a34a" : "#dc2626";
 
   document.body.appendChild(notif);
 
-  // Fade in
-  setTimeout(() => notif.style.opacity = "1", 10);
+  // Animation entrée
+  setTimeout(() => {
+    notif.style.opacity = "1";
+    notif.style.transform = "translate(-50%, -50%) scale(1)";
+  }, 10);
 
-  // Auto remove
+  // Disparition automatique
   setTimeout(() => {
     notif.style.opacity = "0";
+    notif.style.transform = "translate(-50%, -50%) scale(0.9)";
     setTimeout(() => notif.remove(), 300);
-  }, 3000);
+  }, 2500);
 }
+
 
 // Filtrage dynamique
 function applyFilters() {
