@@ -430,23 +430,7 @@ body {
 /* ====================================
    📱 BOTTOM NAV
    ==================================== */
-/* .bottom-nav {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--black);
-  border-radius: 50px;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  justify-items: auto;
-  padding: 12px 20px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  z-index: 999;
-  width: calc(100% - 40px);
-  max-width: 500px;
-} */
+
 .bottom-nav {
   position: fixed;
   bottom: 20px;
@@ -1730,6 +1714,30 @@ body {
         <p class="empty-text">No history</p>
       </div>
     </div>
+
+     <!-- SELECTION -->
+    <div class="section-header" style="margin-top: 24px;">
+      <div class="section-title">Selection</div>
+    </div>
+
+    <div style="background: var(--white); border: 2px solid var(--gray-200); border-radius: 20px; padding: 24px; margin-bottom: 24px;">
+      <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+          <tr style="border-bottom: 2px solid var(--gray-200); text-align: left;">
+            <th style="padding: 12px 8px;">Date</th>
+            <th style="padding: 12px 8px;">Client</th>
+            <th style="padding: 12px 8px;">RequestBy</th>
+          </tr>
+        </thead>
+        <tbody id="details-selection-table-body">
+          <tr>
+            <td colspan="3" style="text-align: center; padding: 20px; color: var(--gray-500);">
+              No selection data
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </div>
 <!-- ═══════════════════════════════════════════════════════════════
@@ -1765,22 +1773,6 @@ body {
   </div>
 </div>
 
-
-<!-- ═══════════════════════════════════════════════════════════════
-     DETAILS SCREEN
-     ═══════════════════════════════════════════════════════════════ -->
-<div id="details-screen" class="screen">
-  <div class="container">
-    <div class="nav-header">
-      <button class="btn-back" onclick="goHome()">←</button>
-      <div class="nav-title">Product Details</div>
-    </div>
-    <div class="empty">
-      <div class="empty-icon">ℹ️</div>
-      <p class="empty-text">Scan QR to view details</p>
-    </div>
-  </div>
-</div>
 
 <!-- ═══════════════════════════════════════════════════════════════
      Dashbaord SCREEN
@@ -1841,11 +1833,10 @@ body {
 
 <script>
 
+const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxusqXZ2oY5a6hN97ljL2oX5_6dcagIZsaEe-_93yLCpWcNweDIFiaPq7nCOq7WYaCS6w/exec';
 
-const GOOGLE_APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyTT7cf3VZXeymJGQhBPiK8vhfLYENLbjxBPi0S6KN1lAVakR5Ps2ocX6EY_Pe5S5fvaA/exec';
-
-const API_URL = 'https://script.google.com/macros/s/AKfycbyTT7cf3VZXeymJGQhBPiK8vhfLYENLbjxBPi0S6KN1lAVakR5Ps2ocX6EY_Pe5S5fvaA/exec';
-const ARCHIVING_SPREADSHEET_ID = '1jBJdi1E142iMLwe8_59O8c4Dq_ua48AWcrukf9dYxwc';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxusqXZ2oY5a6hN97ljL2oX5_6dcagIZsaEe-_93yLCpWcNweDIFiaPq7nCOq7WYaCS6w/exec';
+const ARCHIVING_SPREADSHEET_ID = '1Gm-7LUPBq5JZBLVqDbIhH5o079tUzpelCfypvwrE9Ns';
 
 let currentUser = null;
 let scanCooldown = false;
@@ -2732,7 +2723,9 @@ async function searchDetailsItem() {
     if (result.success && result.data) {
       currentDetailsData = result.data;
       document.getElementById('details-search-input').value = '';
+      
       await loadDetailsHistory(result.data.spreadsheetId, result.data.sourceRow);
+      await loadDetailsSelection(result.data.sNumber); // 🔥 AJOUT
       renderDetailsView();
       stopDetailsScan();
       showScreen('details-view-screen');
@@ -2759,7 +2752,9 @@ async function fetchDetailsData(spreadsheetId, row) {
     
     if (result.success && result.data) {
       currentDetailsData = result.data;
+      
       await loadDetailsHistory(spreadsheetId, row);
+      await loadDetailsSelection(result.data.sNumber); 
       renderDetailsView();
       stopDetailsScan();
       showScreen('details-view-screen');
@@ -2782,6 +2777,41 @@ async function loadDetailsHistory(spreadsheetId, row) {
   } catch (error) {
   }
 }
+async function loadDetailsSelection(sNumber) {
+  try {
+    const response = await fetch(
+      `${API_URL}?apiAction=getSelectionBySNumber&spreadsheetId=${ARCHIVING_SPREADSHEET_ID}&sNumber=${encodeURIComponent(sNumber)}`
+    );
+
+    const result = await response.json();
+
+    const tbody = document.getElementById('details-selection-table-body');
+
+    if (!result.success || !result.selections || result.selections.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="3" style="text-align:center; padding:20px; color:var(--gray-500);">
+            No selection data
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = result.selections.map(item => `
+      <tr style="border-bottom:1px solid var(--gray-200);">
+        <td style="padding:12px;">${item.date || '-'}</td>
+        <td style="padding:12px;">${item.customer || '-'}</td>
+        <td style="padding:12px;">${item.submittedBy || '-'}</td>
+      </tr>
+    `).join('');
+    console.log(document.getElementById('details-selection-table-body'));
+
+  } catch (error) {
+    console.error('Selection load error:', error);
+  }
+}
+
 
 function renderDetailsView() {
   if (!currentDetailsData) return;
@@ -3166,7 +3196,7 @@ function goBackToHomeFromPDF() {
 
 // ====================================
 // Pitch submitted
-// ====================================
+// ==================================== 
 async function submitPitch(pitchData) {
   const username = localStorage.getItem('currentUsername') || 'Unknown';
   pitchData.submittedBy = username; // ajoute le username
@@ -3209,7 +3239,7 @@ async function loadPitchScreen() {
       `;
       return;
     }
-    result.items.reverse();
+    // result.items.reverse();
 
     // Ajoute la ligne de filtres si pas déjà présente
     addFiltersRow();
