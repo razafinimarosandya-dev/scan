@@ -1095,7 +1095,16 @@ body {
 /* __________________________ */
 /* pitch                      */
 /* __________________________ */
-
+.btn-view-pdf{
+  border-color:transparent;
+}
+.btn-view-pdf:hover{
+  border-color:black;
+  width: 48px;
+  padding: 1px;
+  height: 30px;
+  background-color: rgb(111, 174, 226);
+}
 /* Container principal du pitch-screen */
 #pitch-screen .container {
   display: flex;
@@ -1109,41 +1118,16 @@ body {
 
 /* Wrapper du tableau pour occuper tout l'espace restant */
 #pitch-screen .table-wrapper {
-  flex: 1;                /* prend tout l'espace vertical restant */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: auto;          /* scroll vertical et horizontal si nécessaire */
+  overflow: auto;
   background: white;
   border: 2px solid var(--gray-200);
   border-radius: 20px;
   padding: 16px;
 }
 
-/* Tableau responsive */
-#pitch-screen table {
-  width: 100%;             /* occupe toute la largeur du wrapper */
-  min-width: 800px;        /* largeur minimale pour lisibilité */
-  border-collapse: collapse;
-  table-layout: auto;
-}
-/* Header du tableau */
-#pitch-screen th {
-  padding: 12px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--gray-600);
-  text-align: left;
-  border-bottom: 2px solid var(--gray-200);
-}
-
-/* Cellules du tableau */
-#pitch-screen td {
-  padding: 12px;
-  font-size: 14px;
-  color: var(--gray-800);
-  border-bottom: 1px solid var(--gray-200);
-}
-/* Sticky pour la première ligne du thead (titres) */
 #pitch-screen table thead tr:first-child th {
   position: sticky;
   top: 0;                 /* collé en haut du wrapper */
@@ -1163,7 +1147,7 @@ body {
 /* Ligne des filtres (ajoutée dynamiquement) */
 #pitch-screen table thead tr.filters-row th {
   position: sticky;
-  top: 40px; /* hauteur approximative de la première ligne des titres, ajuste si nécessaire */
+  top: 25px; /* hauteur approximative de la première ligne des titres, ajuste si nécessaire */
   background: #f9f9f9;
   z-index: 2;
   border-bottom: 2px solid var(--gray-200);
@@ -1182,7 +1166,92 @@ body {
   overflow-x: auto;
 }
 
+/* pitch mobile */
 
+@media (max-width: 600px) {
+  
+
+  /* --- Reste du design (Cartes) --- */
+  #pitch-screen tbody, #pitch-screen tr, #pitch-screen td {
+    display: block;
+    width: 100%;
+  }
+
+  #pitch-screen tr {
+    background: white;
+    border: 2px solid var(--gray-200);
+    border-radius: 20px;
+    margin-bottom: 15px;
+    padding: 15px;
+  }
+
+  #pitch-screen td {
+    display: flex !important;
+    padding: 8px 0 !important;
+    border: none !important;
+  }
+
+  #pitch-screen td::before {
+    content: attr(data-label);
+    width: 100px;
+    font-weight: 700;
+    color: var(--gray-500);
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+
+  #pitch-screen td span {
+    flex: 1;
+    font-weight: 600;
+  }
+   #pitch-screen thead {
+    display: block;
+    width: 100%;
+    background: var(--gray-50);
+    padding: 0px;
+    margin: 0px;
+    border-radius: 15px;
+  }
+
+  /* On force les deux lignes (Titres et Filtres) à s'afficher */
+  #pitch-screen thead tr {
+    display: flex !important;
+    flex-direction: row !important; /* Garde l'alignement horizontal pour les colonnes */
+    width: 100%;
+    border: none !important;
+    padding: 0px;
+    margin: 0px;
+  }
+
+  /* On ajuste les titres (1ère ligne) */
+  #pitch-screen thead tr:first-child th {
+    display: block;
+    flex: 1;
+    font-size: 9px; /* Très petit pour que ça tienne */
+    text-transform: uppercase;
+    color: var(--gray-500);
+    text-align: center;
+    padding: 4px 2px !important;
+  }
+
+  /* On ajuste les filtres (2ème ligne) */
+  #pitch-screen thead tr.filters-row th {
+    display: block;
+    flex: 1;
+    padding: 0px;
+    margin: 0px;
+  }
+
+  /* On rend les inputs de filtres plus petits pour mobile */
+  #pitch-screen thead tr.filters-row input,
+  #pitch-screen thead tr.filters-row select {
+    font-size: 10px;
+    padding: 4px;
+    height: 35px;
+  }
+
+}
 </style>
 </head>
 
@@ -1749,7 +1818,6 @@ body {
       <button class="btn-back" onclick="goHome()">←</button>
       <div class="nav-title">Pitch Submitted</div>
     </div>
-
     <div class="table-wrapper">
       <table>
         <thead>
@@ -1829,6 +1897,7 @@ body {
     <span class="nav-label">Check Out</span>
   </button>
 </nav>
+
 
 
 <script>
@@ -3239,39 +3308,35 @@ async function loadPitchScreen() {
       `;
       return;
     }
-    // result.items.reverse();
-
-    // Ajoute la ligne de filtres si pas déjà présente
     addFiltersRow();
 
     result.items.forEach((item, index) => {
-      const row = document.createElement('tr');
-      row.style.borderBottom = "1px solid var(--gray-200)";
-      
-      const url = item.url || '';
-      row.innerHTML = `
-        <td style="padding:12px;">${item.id}</td>
-        <td style="padding:12px;">${item.customer}</td>
-        <td style="padding:12px;">${item.dateSelection}</td>
-        <td style="padding:12px;">${item.submittedBy || ''}</td> <!-- Nouvelle colonne -->
-        <td>
-          <select onchange="changeStatus('${item.id}', this.value, this)">
-            <option value="New" ${item.status === "New" ? "selected" : ""}>New</option>
-            <option value="WIP" ${item.status === "WIP" ? "selected" : ""}>WIP</option>
-            <option value="Closed" ${item.status === "Closed" ? "selected" : ""}>Closed</option>
-            <option value="Reject" ${item.status === "Reject" ? "selected" : ""}>Reject</option>
-          </select>
-        </td>
-        <td style="text-align:center;">
-          <button class="btn-view-pdf" onclick="openPDF('${url}')" title="View PDF">
-            ➡️
-          </button>
+  const row = document.createElement('tr');
+  const url = item.url || '';
+  
+  row.innerHTML = `
+    <td data-label="Ref No"><span>${item.id}</span></td>
+    <td data-label="Customer"><span>${item.customer}</span></td>
+    <td data-label="Date"><span>${item.dateSelection}</span></td>
+    <td data-label="By"><span>${item.submittedBy || ''}</span></td>
+    <td data-label="Status">
+      <span>
+        <select onchange="changeStatus('${item.id}', this.value, this)">
+          <option value="New" ${item.status === "New" ? "selected" : ""}>New</option>
+          <option value="WIP" ${item.status === "WIP" ? "selected" : ""}>WIP</option>
+          <option value="Closed" ${item.status === "Closed" ? "selected" : ""}>Closed</option>
+          <option value="Reject" ${item.status === "Reject" ? "selected" : ""}>Reject</option>
+        </select>
+      </span>
     </td>
-      `;
-
-      tbody.appendChild(row);
-    });
-
+    <td data-label="PDF">
+      <span>
+        <button class="btn-view-pdf" onclick="openPDF('${url}')">Click➡️</button>
+      </span>
+    </td>
+  `;
+  tbody.appendChild(row);
+});
   } catch (error) {
     hideLoader();
     alert('Connection error');
